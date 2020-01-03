@@ -1,2 +1,3 @@
-# pygame
-# pygame
+# pygame 寫的貪食蛇小遊戲
+記得先在電腦下再pygame套件
+之後陸續補上註解
