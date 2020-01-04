@@ -1,40 +1,40 @@
 import pygame, sys, time, random
 
 
-#settings(global variables)
+#初始設定(全域變數)
 
-# Colors (R, G, B)
-black = pygame.Color(0, 0, 0)
-white = pygame.Color(255, 255, 255)
-red = pygame.Color(255, 0, 0)
-green = pygame.Color(0, 255, 0)
-blue = pygame.Color(0, 0, 255)
+# tuple形式傳遞
+# 顏色 = (R, G, B)
+black = (0, 0, 0)
+white = (255, 255, 255)
+red   = (255, 0, 0)
+green = (0, 255, 0)
+blue  = (0, 0, 255)
 
-# Window size
+# 視窗大小
 frame_size_x = 720
 frame_size_y = 480
 game_window = pygame.display.set_mode((frame_size_x, frame_size_y))
 pygame.display.set_caption("snake")
 
 score = 0
-    
-
-#snake
+   
+# 蛇
 snake_pos = [300, 300]
 snake_body = [[300, 300], [290, 300], [280, 300]]
 direction = 'UP'
 change_to = direction
 
-#food
+# 吃的點點
 food_pos = [random.randrange(1, (frame_size_x//10)) * 10, random.randrange(1, (frame_size_y//10)) * 10]
 food_spawn = True
 
-# FPS (frames per second) controller
+# 偵數控制
 fps_controller = pygame.time.Clock()
 
 
 
-#score
+# 顯示分數
 def show_Score(choice, color, font, size):
         global score
         score_font = pygame.font.SysFont(font, size)
@@ -45,7 +45,8 @@ def show_Score(choice, color, font, size):
         else:
             score_rect.midtop = (frame_size_x/2, frame_size_y/2)
         game_window.blit(score_surface, score_rect)
-#restart
+
+# 顯示"重新開始"文字
 def restart(color, font, size):
         restart_font = pygame.font.SysFont(font, size)
         restart_surface = restart_font.render('press SPACE to restart', True, color)
@@ -65,42 +66,42 @@ def gameover():
         game_window.blit(gameoverSurf, gameoverRect)
         show_Score(0,red,'times',20)
         restart(blue,'times',30)
-        pygame.display.flip() #renew surface
+        pygame.display.flip() # 更新視窗
+        
         while True:
-            keys=pygame.key.get_pressed()
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
                     running = False
-                    time.sleep(1) #stay 1 seconds
+                    time.sleep(1) # 停留一秒
                     pygame.quit()
                 
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        
+                        # 更新全域變數到初始狀態
                         global snake_pos
                         global snake_body
                         global direction
                         global change_to
                         score = 0
-                        #snake
                         snake_pos = [300, 300]
                         snake_body = [[300, 300], [290, 300], [280, 300]]
                         direction = 'UP'
                         change_to = direction
                         main.running = True
+                        time.sleep(1) # 停留一秒
                         pygame.display.update()
                         main()
                         break
             
    
-#snake 
+# 蛇 
 class Snake:
     def __init__(self):
         pass
         
-
+    # 確認當前移動方向 與 控制者執行方向 是否相反
     def make_sure():
         global direction 
         global change_to 
@@ -113,6 +114,7 @@ class Snake:
         if change_to == 'RIGHT' and direction != 'LEFT':
             direction = 'RIGHT'
 
+    # 蛇身體增長
     def growing():
         global snake_body
         global score
@@ -123,7 +125,7 @@ class Snake:
            food_spawn = False
         else:
            snake_body.pop()
-
+    # 移動
     def moving():
         global direction
         global snack_pos
@@ -138,45 +140,43 @@ class Snake:
 
 
  
-#food
+# 吃的點點
 class Food:
 
     def __init__(self):
         pass
-
+    # 更新食物位置
     def spawing():
         global food_spawn
         global food_pos
         if not food_spawn:
-            food_pos = [random.randrange(1, (frame_size_x//10)) * 10, random.randrange(1, (frame_size_y//10)) * 10]
+            food_pos = [random.randrange(1, (frame_size_x//10)) * 10, random.randrange(1, (frame_size_y//10)) * 10] # 在視窗內隨機生成
         food_spawn = True
         
-
-#main
+# 主函式
 def main():
-    pygame.init()
+    pygame.init() # 初始化
     global change_to
     global snake_body
     global snake_pos
     running = True
     while running:
-        game_window.fill(black)
-        for event in pygame.event.get():
-            if  event.type == pygame.QUIT:
+        game_window.fill(black) # 視窗顏色
+        
+        for event in pygame.event.get():   # 事件
+            if  event.type == pygame.QUIT: # 按叉離開
                 pygame.display.quit()
                 pygame.quit()
                 
-                
-                
-
-            elif event.type == pygame.KEYDOWN:
-                # quit game
+            elif event.type == pygame.KEYDOWN: # 其餘按鍵
+                # 按 esc 跳出遊戲
                 if event.key == pygame.K_ESCAPE: 
                    pygame.quit()
                    exit(0)
-                #w s a d
+
+                # w s a d 或 ↑ ↓ ← → 移動
                 if event.key == pygame.K_UP or event.key == ord('w'):
-                    change_to = 'UP'
+                    change_to = 'UP'                                    # 先儲存到預計移動方向
                 if event.key == pygame.K_DOWN or event.key == ord('s'):
                     change_to = 'DOWN'
                 if event.key == pygame.K_LEFT or event.key == ord('a'):
@@ -184,45 +184,46 @@ def main():
                 if event.key == pygame.K_RIGHT or event.key == ord('d'):
                     change_to = 'RIGHT'
 
-        #oppisite way
+        # 呼叫函示(確認方向、移動、吃到點伸長、更新點點位置)
         Snake.make_sure()
         Snake.moving()
         Snake.growing()
         Food.spawing()
 
-        
+        # 畫出蛇身
         for pos in snake_body:
             # Snake body
-            # .draw.rect(play_surface, color, xy-coordinate)
-            # xy-coordinate -> .Rect(x, y, size_x, size_y)
+            # .draw.rect(視窗, 顏色, xy座標)
+            # xy座標 -> .Rect(x, y, size_x, size_y)
             pygame.draw.rect(game_window, green, pygame.Rect(pos[0], pos[1], 10, 10))
 
-        # food
+        # 畫出食物
         pygame.draw.rect(game_window, white, pygame.Rect(food_pos[0], food_pos[1], 10, 10))
 
 
-        # Game Over conditions
-        # Getting out of bounds
+        # Game Over 情況
+        # 撞到邊界
         if snake_pos[0] < 0 or snake_pos[0] > frame_size_x-10:
             gameover()
         if snake_pos[1] < 0 or snake_pos[1] > frame_size_y-10:
             gameover()
-        # Touching  body
+        # 撞到蛇身
         for block in snake_body[1:]:
             if snake_pos[0] == block[0] and snake_pos[1] == block[1]:
                 gameover()
             show_Score(1, white, 'consolas', 20)
 
-        # Refresh game screen
+        # 更新視窗
         pygame.display.update()
 
+        # 偵數( 控制難度用 )
         fps_controller.tick(30)
 
-        
-
-
+      
 if __name__ == '__main__':
     main()
     pygame.quit()
+   
+   
    
    
