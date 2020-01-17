@@ -1,6 +1,5 @@
 import pygame, sys, time, random
 
-
 #初始設定(全域變數)
 
 # tuple形式傳遞
@@ -22,8 +21,9 @@ score = 0
 # 蛇
 snake_pos = [300, 300]
 snake_body = [[300, 300], [290, 300], [280, 300]]
-direction = 'UP'
+direction = 'RIGHT'
 change_to = direction
+speed = 15
 
 # 吃的點點
 food_pos = [random.randrange(1, (frame_size_x//10)) * 10, random.randrange(1, (frame_size_y//10)) * 10]
@@ -31,11 +31,20 @@ food_spawn = True
 
 # 偵數控制
 fps_controller = pygame.time.Clock()
+flag = 0
 
 
-
+# 加速
+def accelerate():
+    global score
+    global speed
+    global flag
+    if speed <= 27 and flag == 1 :
+        speed += 1
+        flag = 0
 # 顯示分數
 def show_Score(choice, color, font, size):
+
         global score
         score_font = pygame.font.SysFont(font, size)
         score_surface = score_font.render('Score : ' + str(score), True, color)
@@ -72,7 +81,6 @@ def gameover():
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
-                    running = False
                     time.sleep(1) # 停留一秒
                     pygame.quit()
                 
@@ -84,12 +92,13 @@ def gameover():
                         global snake_body
                         global direction
                         global change_to
+                        global speed
+                        speed = 15
                         score = 0
                         snake_pos = [300, 300]
                         snake_body = [[300, 300], [290, 300], [280, 300]]
                         direction = 'UP'
                         change_to = direction
-                        main.running = True
                         time.sleep(1) # 停留一秒
                         pygame.display.update()
                         main()
@@ -102,7 +111,7 @@ class Snake:
         pass
         
     # 確認當前移動方向 與 控制者執行方向 是否相反
-    def make_sure():
+    def make_sure(self):
         global direction 
         global change_to 
         if change_to == 'UP' and direction != 'DOWN':
@@ -115,18 +124,20 @@ class Snake:
             direction = 'RIGHT'
 
     # 蛇身體增長
-    def growing():
+    def growing(self):
         global snake_body
         global score
         global food_spawn
+        global flag
         snake_body.insert(0, list(snake_pos))
         if snake_pos[0] == food_pos[0] and snake_pos[1] == food_pos[1]:
            score += 1
+           flag = 1
            food_spawn = False
         else:
            snake_body.pop()
     # 移動
-    def moving():
+    def moving(self):
         global direction
         global snack_pos
         if direction == 'UP':
@@ -146,7 +157,7 @@ class Food:
     def __init__(self):
         pass
     # 更新食物位置
-    def spawing():
+    def spawing(self):
         global food_spawn
         global food_pos
         if not food_spawn:
@@ -159,10 +170,11 @@ def main():
     global change_to
     global snake_body
     global snake_pos
-    running = True
-    while running:
+    global flag
+
+    while True:   
         game_window.fill(black) # 視窗顏色
-        
+
         for event in pygame.event.get():   # 事件
             if  event.type == pygame.QUIT: # 按叉離開
                 pygame.display.quit()
@@ -171,10 +183,10 @@ def main():
             elif event.type == pygame.KEYDOWN: # 其餘按鍵
                 # 按 esc 跳出遊戲
                 if event.key == pygame.K_ESCAPE: 
-                   pygame.quit()
-                   exit(0)
+                    pygame.quit()
+                    exit(0)
 
-                # w s a d 或 ↑ ↓ ← → 移動
+            # w s a d 或 ↑ ↓ ← → 移動
                 if event.key == pygame.K_UP or event.key == ord('w'):
                     change_to = 'UP'                                    # 先儲存到預計移動方向
                 if event.key == pygame.K_DOWN or event.key == ord('s'):
@@ -183,12 +195,14 @@ def main():
                     change_to = 'LEFT'
                 if event.key == pygame.K_RIGHT or event.key == ord('d'):
                     change_to = 'RIGHT'
-
+                
+        snake = Snake()
+        food = Food()
         # 呼叫函示(確認方向、移動、吃到點伸長、更新點點位置)
-        Snake.make_sure()
-        Snake.moving()
-        Snake.growing()
-        Food.spawing()
+        snake.make_sure()
+        snake.moving()
+        snake.growing()
+        food.spawing()
 
         # 畫出蛇身
         for pos in snake_body:
@@ -217,13 +231,13 @@ def main():
         pygame.display.update()
 
         # 偵數( 控制難度用 )
-        fps_controller.tick(30)
+        global speed
+        accelerate()
+        fps_controller.tick(speed)
 
       
 if __name__ == '__main__':
     main()
     pygame.quit()
-   
-   
    
    
